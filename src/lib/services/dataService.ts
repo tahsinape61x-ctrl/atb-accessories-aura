@@ -483,6 +483,34 @@ export const dataService = {
     return getStoredOrders();
   },
 
+  async updateOrderStatus(orderId: string, status: any): Promise<Order | null> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .update({ status })
+          .eq('id', orderId)
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.error('Supabase updateOrderStatus error:', err);
+      }
+    }
+
+    const currentOrders = getStoredOrders();
+    const updated = currentOrders.map((o) => (o.id === orderId ? { ...o, status } : o));
+    saveStoredOrders(updated);
+
+    const target = updated.find((o) => o.id === orderId);
+    if (target && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(`order_${target.order_number}`, JSON.stringify(target));
+      } catch (e) {}
+    }
+    return target || null;
+  },
+
   // --- SETTINGS ---
   async getStoreSettings(): Promise<StoreSettings> {
     return localSettings;

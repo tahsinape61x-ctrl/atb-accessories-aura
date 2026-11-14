@@ -23,12 +23,20 @@ export default function TrackOrderPage() {
       const allOrders = await dataService.getOrders();
       const term = searchTerm.trim().toLowerCase();
 
-      // Match by order number or phone number
-      const found = allOrders.find(
+      let found = allOrders.find(
         (o) =>
           (o.order_number ? o.order_number.toLowerCase() === term : false) ||
           (o.customer_phone ? o.customer_phone.replace(/\D/g, '').includes(term.replace(/\D/g, '')) : false)
       );
+
+      if (!found && typeof window !== 'undefined') {
+        try {
+          const direct = localStorage.getItem(`order_${searchTerm.trim().toUpperCase()}`);
+          if (direct) {
+            found = JSON.parse(direct);
+          }
+        } catch (e) {}
+      }
 
       setOrder(found || null);
     } catch (err) {
@@ -44,6 +52,7 @@ export default function TrackOrderPage() {
       case 'new':
       case 'payment_pending':
         return 1;
+      case 'confirmed':
       case 'processing':
         return 2;
       case 'shipped':
