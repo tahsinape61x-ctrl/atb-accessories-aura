@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import TopHeader from '@/components/layout/TopHeader';
-import Header from '@/components/layout/Header';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import StoreLayout from '@/components/layout/StoreLayout';
 import FacebookPixel from '@/components/FacebookPixel';
 import { CartProvider } from '@/context/CartContext';
 import { Suspense } from 'react';
@@ -29,13 +26,7 @@ export default function RootLayout({
           <FacebookPixel />
         </Suspense>
         <CartProvider>
-          <TopHeader />
-          <Header />
-          <Navbar />
-          <main className="flex-grow bg-[#F7F8FA] text-slate-900 w-full max-w-full overflow-x-hidden">
-            {children}
-          </main>
-          <Footer />
+          <StoreLayout>{children}</StoreLayout>
         </CartProvider>
       </body>
     </html>

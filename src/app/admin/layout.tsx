@@ -13,15 +13,19 @@ import {
   LogOut,
   ChevronRight,
   ExternalLink,
+  Menu,
+  X,
+  ShieldCheck,
+  Bell,
 } from 'lucide-react';
 
 const ADMIN_NAV = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Products', href: '/admin/products', icon: Package },
+  { name: 'Products Catalog', href: '/admin/products', icon: Package },
   { name: 'Categories', href: '/admin/categories', icon: Layers },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-  { name: 'Payments', href: '/admin/payments', icon: CreditCard },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Customer Orders', href: '/admin/orders', icon: ShoppingBag },
+  { name: 'Payments & TrxID', href: '/admin/payments', icon: CreditCard },
+  { name: 'Store Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginPage = pathname === '/admin/login';
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isLoginPage) return;
@@ -41,13 +46,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [pathname, isLoginPage, router]);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   if (isLoginPage) {
     return <>{children}</>;
   }
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#F5921F] border-t-transparent"></div>
       </div>
     );
@@ -59,22 +69,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-slate-900 text-white shrink-0 p-5 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans">
+      {/* Mobile Top Header */}
+      <div className="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 sticky top-0 z-50">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#F5921F] flex items-center justify-center font-black text-slate-950 text-sm">
+            A
+          </div>
+          <span className="font-extrabold text-sm text-white">ATB Admin</span>
+        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-1.5 text-slate-300 hover:text-white rounded-lg bg-slate-800"
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Sidebar (Desktop and Mobile Overlay) */}
+      <aside
+        className={`${
+          mobileMenuOpen ? 'block' : 'hidden'
+        } md:flex w-full md:w-64 bg-slate-900 text-white shrink-0 p-5 flex-col justify-between fixed md:sticky top-0 h-screen z-40 border-r border-slate-800 shadow-xl`}
+      >
         <div className="space-y-6">
-          <div className="flex items-center space-x-3 pb-4 border-b border-slate-800">
-            <div className="w-9 h-9 rounded-xl bg-[#F5921F] flex items-center justify-center font-black text-slate-950 text-base">
+          {/* Logo & Store Branding */}
+          <div className="flex items-center space-x-3 pb-5 border-b border-slate-800">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#F5921F] to-orange-400 flex items-center justify-center font-black text-slate-950 text-lg shadow-md">
               A
             </div>
             <div>
-              <h2 className="text-sm font-extrabold text-white">ATB Admin</h2>
-              <p className="text-[10px] text-slate-400">Control Panel</p>
+              <h2 className="text-sm font-black text-white tracking-tight">ATB ACCESSORIES</h2>
+              <p className="text-[10px] text-[#F5921F] font-bold uppercase tracking-wider">Admin Portal</p>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="space-y-1.5">
+          <nav className="space-y-1">
             {ADMIN_NAV.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -84,12 +115,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={item.href}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#F5921F] text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      ? 'bg-[#F5921F] text-slate-950 font-extrabold shadow-sm'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
                   }`}
                 >
-                  <div className="flex items-center space-x-2.5">
-                    <Icon className="w-4 h-4" />
+                  <div className="flex items-center space-x-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-slate-950' : 'text-slate-400'}`} />
                     <span>{item.name}</span>
                   </div>
                   {isActive && <ChevronRight className="w-3.5 h-3.5" />}
@@ -100,18 +131,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Bottom Actions */}
-        <div className="pt-6 border-t border-slate-800 space-y-2">
+        <div className="pt-6 border-t border-slate-800/80 space-y-2">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center space-x-2 px-3.5 py-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+            className="flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition-colors"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5 text-[#F5921F]" />
             <span>View Live Website</span>
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-2 px-3.5 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
+            className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>
@@ -120,8 +151,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-grow p-4 sm:p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-grow flex flex-col min-w-0 overflow-y-auto">
+        {/* Top Navbar Header inside Admin */}
+        <header className="bg-white border-b border-slate-200 px-6 py-3.5 hidden md:flex items-center justify-between sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center space-x-3">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-bold text-slate-700">
+              ATB ACCESSORIES AURA — Store Administration
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Link
+              href="/"
+              target="_blank"
+              className="text-xs font-bold text-[#F5921F] hover:underline flex items-center space-x-1"
+            >
+              <span>Storefront</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+
+            <div className="h-4 w-px bg-slate-200"></div>
+
+            <div className="flex items-center space-x-2">
+              <div className="w-7 h-7 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-[11px] font-bold text-[#F5921F]">
+                A
+              </div>
+              <span className="text-xs font-bold text-slate-800">Administrator</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Container */}
+        <div className="p-4 sm:p-8 flex-grow max-w-6xl w-full mx-auto">
           {children}
         </div>
       </main>
