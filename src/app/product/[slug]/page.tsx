@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
                 {formatPrice(product.price)}
               </span>
             )}
-            {discountPct && (
+            {discountPct && product.discount_price && (
               <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
                 Save {formatPrice(product.price - product.discount_price)}
               </span>
