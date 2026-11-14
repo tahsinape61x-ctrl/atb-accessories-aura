@@ -124,11 +124,13 @@ export type StoreSettings = {
   store_name: string;
   logo_url?: string;
   whatsapp_number: string;
+  hotline_phone?: string;
   bkash_number: string;
   nagad_number: string;
   rocket_number: string;
   delivery_charge_inside_dhaka: number;
   delivery_charge_outside_dhaka: number;
   admin_notification_email: string;
+  support_email?: string;
   updated_at?: string;
 };

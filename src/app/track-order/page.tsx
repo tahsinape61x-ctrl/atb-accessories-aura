@@ -26,8 +26,8 @@ export default function TrackOrderPage() {
       // Match by order number or phone number
       const found = allOrders.find(
         (o) =>
-          o.order_number.toLowerCase() === term ||
-          o.customer_phone.replace(/\D/g, '').includes(term.replace(/\D/g, ''))
+          (o.order_number ? o.order_number.toLowerCase() === term : false) ||
+          (o.customer_phone ? o.customer_phone.replace(/\D/g, '').includes(term.replace(/\D/g, '')) : false)
       );
 
       setOrder(found || null);

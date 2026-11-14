@@ -24,9 +24,9 @@ export default function AdminOrdersPage() {
 
   const filtered = orders.filter(
     (o) =>
-      o.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.customer_phone.includes(searchTerm)
+      (o.order_number ? o.order_number.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+      (o.customer_name ? o.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+      (o.customer_phone ? o.customer_phone.includes(searchTerm) : false)
   );
 
   return (

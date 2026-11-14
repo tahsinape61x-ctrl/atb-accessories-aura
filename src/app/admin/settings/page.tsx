@@ -74,8 +74,8 @@ export default function AdminSettingsPage() {
               <label className="block text-xs font-bold text-slate-700 mb-1">Hotline / WhatsApp</label>
               <input
                 type="text"
-                value={settings.hotline_phone}
-                onChange={(e) => setSettings({ ...settings, hotline_phone: e.target.value })}
+                value={settings.hotline_phone || settings.whatsapp_number || ''}
+                onChange={(e) => setSettings({ ...settings, hotline_phone: e.target.value, whatsapp_number: e.target.value })}
                 className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-[#F5921F]"
               />
             </div>
@@ -84,8 +84,8 @@ export default function AdminSettingsPage() {
             <label className="block text-xs font-bold text-slate-700 mb-1">Contact Email</label>
             <input
               type="email"
-              value={settings.support_email}
-              onChange={(e) => setSettings({ ...settings, support_email: e.target.value })}
+              value={settings.support_email || settings.admin_notification_email || ''}
+              onChange={(e) => setSettings({ ...settings, support_email: e.target.value, admin_notification_email: e.target.value })}
               className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-[#F5921F]"
             />
           </div>
