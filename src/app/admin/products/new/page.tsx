@@ -70,24 +70,84 @@ export default function AdminNewProductPage() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
-    setFormData((prev) => ({ ...prev, title: val, slug }));
+
+    let matchedCatId = formData.category_id;
+    const lower = val.toLowerCase();
+    if (lower.includes('power') || lower.includes('bank')) {
+      const pb = categories.find((c) => c.slug === 'power-bank');
+      if (pb) matchedCatId = pb.id;
+    } else if (lower.includes('airpod') || lower.includes('earbud') || lower.includes('tws')) {
+      const ap = categories.find((c) => c.slug === 'airpods-bluetooth');
+      if (ap) matchedCatId = ap.id;
+    } else if (lower.includes('cable') || lower.includes('cord')) {
+      const cb = categories.find((c) => c.slug === 'cables');
+      if (cb) matchedCatId = cb.id;
+    } else if (lower.includes('watch')) {
+      const sw = categories.find((c) => c.slug === 'smart-watch');
+      if (sw) matchedCatId = sw.id;
+    } else if (lower.includes('speaker')) {
+      const sp = categories.find((c) => c.slug === 'speaker');
+      if (sp) matchedCatId = sp.id;
+    } else if (lower.includes('neckband') || lower.includes('earphone')) {
+      const ep = categories.find((c) => c.slug === 'earphones-neckbands');
+      if (ep) matchedCatId = ep.id;
+    }
+
+    setFormData((prev) => ({ ...prev, title: val, slug, category_id: matchedCatId }));
   };
 
-  // Handle local file uploads (Base64)
-  const handleFiles = (files: FileList | File[]) => {
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file (PNG, JPG, WEBP)');
-        return;
-      }
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        if (e.target?.result && typeof e.target.result === 'string') {
-          setUploadedImages((prev) => [...prev, e.target!.result as string]);
-        }
+        const img = document.createElement('img');
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_DIM = 900;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_DIM) {
+              height *= MAX_DIM / width;
+              width = MAX_DIM;
+            }
+          } else {
+            if (height > MAX_DIM) {
+              width *= MAX_DIM / height;
+              height = MAX_DIM;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          } else {
+            resolve(e.target?.result as string);
+          }
+        };
+        img.src = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleFiles = async (files: FileList | File[]) => {
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (PNG, JPG, WEBP)');
+        continue;
+      }
+      try {
+        const compressedBase64 = await compressImage(file);
+        setUploadedImages((prev) => [...prev, compressedBase64]);
+      } catch (err) {
+        console.error('Compression error:', err);
+      }
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -9,13 +9,90 @@ import {
 } from '../mockData';
 import { Category, Subcategory, Brand, Product, Slider, StoreSettings, Order } from '../supabase/types';
 
-let localCategories = [...INITIAL_CATEGORIES];
+const STORAGE_KEYS = {
+  PRODUCTS: 'atb_store_products_v2',
+  CATEGORIES: 'atb_store_categories_v2',
+  BRANDS: 'atb_store_brands_v2',
+  ORDERS: 'atb_store_orders_v2',
+  SETTINGS: 'atb_store_settings_v2',
+};
+
+// Safe localStorage getters
+function getStoredProducts(): Product[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.error('Error reading products from localStorage', err);
+    }
+  }
+  return [...INITIAL_PRODUCTS];
+}
+
+function saveStoredProducts(prods: Product[]) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
+      window.dispatchEvent(new Event('atb_store_updated'));
+    } catch (err) {
+      console.error('Error saving products to localStorage', err);
+    }
+  }
+}
+
+function getStoredCategories(): Category[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (err) {
+      console.error('Error reading categories from localStorage', err);
+    }
+  }
+  return [...INITIAL_CATEGORIES];
+}
+
+function saveStoredCategories(cats: Category[]) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(cats));
+    } catch (err) {
+      console.error('Error saving categories to localStorage', err);
+    }
+  }
+}
+
+function getStoredOrders(): Order[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.ORDERS);
+      if (stored) return JSON.parse(stored);
+    } catch (err) {}
+  }
+  return [];
+}
+
+function saveStoredOrders(orders: Order[]) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    } catch (err) {}
+  }
+}
+
 let localSubcategories = [...INITIAL_SUBCATEGORIES];
 let localBrands = [...INITIAL_BRANDS];
-let localProducts = [...INITIAL_PRODUCTS];
 let localSliders = [...INITIAL_SLIDERS];
 let localSettings = { ...INITIAL_SETTINGS };
-let localOrders: Order[] = [];
 
 export const dataService = {
   // --- CATEGORIES ---
@@ -31,34 +108,40 @@ export const dataService = {
         console.error('Supabase getCategories error:', err);
       }
     }
-    return localCategories;
+    return getStoredCategories();
   },
 
   async saveCategory(category: Partial<Category>): Promise<Category> {
     if (isSupabaseConfigured() && supabase) {
-      if (category.id) {
-        const { data, error } = await supabase
-          .from('categories')
-          .update(category)
-          .eq('id', category.id)
-          .select()
-          .single();
-        if (!error && data) return data;
-      } else {
-        const { data, error } = await supabase
-          .from('categories')
-          .insert(category)
-          .select()
-          .single();
-        if (!error && data) return data;
+      try {
+        if (category.id) {
+          const { data, error } = await supabase
+            .from('categories')
+            .update(category)
+            .eq('id', category.id)
+            .select()
+            .single();
+          if (!error && data) return data;
+        } else {
+          const { data, error } = await supabase
+            .from('categories')
+            .insert(category)
+            .select()
+            .single();
+          if (!error && data) return data;
+        }
+      } catch (err) {
+        console.error('Supabase saveCategory error:', err);
       }
     }
 
+    const current = getStoredCategories();
     if (category.id) {
-      localCategories = localCategories.map((c) =>
+      const updated = current.map((c) =>
         c.id === category.id ? ({ ...c, ...category } as Category) : c
       );
-      return localCategories.find((c) => c.id === category.id)!;
+      saveStoredCategories(updated);
+      return updated.find((c) => c.id === category.id)!;
     } else {
       const newCat: Category = {
         id: `cat-${Date.now()}`,
@@ -66,20 +149,24 @@ export const dataService = {
         slug: category.slug || `category-${Date.now()}`,
         description: category.description || '',
         image_url: category.image_url || '',
-        display_order: category.display_order || localCategories.length + 1,
+        display_order: category.display_order || current.length + 1,
         created_at: new Date().toISOString(),
       };
-      localCategories.push(newCat);
+      const updated = [...current, newCat];
+      saveStoredCategories(updated);
       return newCat;
     }
   },
 
   async deleteCategory(id: string): Promise<boolean> {
     if (isSupabaseConfigured() && supabase) {
-      const { error } = await supabase.from('categories').delete().eq('id', id);
-      if (!error) return true;
+      try {
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (!error) return true;
+      } catch (err) {}
     }
-    localCategories = localCategories.filter((c) => c.id !== id);
+    const current = getStoredCategories();
+    saveStoredCategories(current.filter((c) => c.id !== id));
     return true;
   },
 
@@ -91,9 +178,7 @@ export const dataService = {
         if (categoryId) query = query.eq('category_id', categoryId);
         const { data, error } = await query;
         if (!error && data && data.length > 0) return data;
-      } catch (err) {
-        console.error('Supabase getSubcategories error:', err);
-      }
+      } catch (err) {}
     }
     return categoryId
       ? localSubcategories.filter((s) => s.category_id === categoryId)
@@ -101,37 +186,18 @@ export const dataService = {
   },
 
   async saveSubcategory(sub: Partial<Subcategory>): Promise<Subcategory> {
-    if (isSupabaseConfigured() && supabase) {
-      if (sub.id) {
-        const { data, error } = await supabase.from('subcategories').update(sub).eq('id', sub.id).select().single();
-        if (!error && data) return data;
-      } else {
-        const { data, error } = await supabase.from('subcategories').insert(sub).select().single();
-        if (!error && data) return data;
-      }
-    }
-
-    if (sub.id) {
-      localSubcategories = localSubcategories.map((s) => s.id === sub.id ? ({ ...s, ...sub } as Subcategory) : s);
-      return localSubcategories.find((s) => s.id === sub.id)!;
-    } else {
-      const newSub: Subcategory = {
-        id: `sub-${Date.now()}`,
-        category_id: sub.category_id || '',
-        name: sub.name || 'New Subcategory',
-        slug: sub.slug || `sub-${Date.now()}`,
-        created_at: new Date().toISOString(),
-      };
-      localSubcategories.push(newSub);
-      return newSub;
-    }
+    const newSub: Subcategory = {
+      id: sub.id || `sub-${Date.now()}`,
+      category_id: sub.category_id || '',
+      name: sub.name || 'New Subcategory',
+      slug: sub.slug || `sub-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    localSubcategories.push(newSub);
+    return newSub;
   },
 
   async deleteSubcategory(id: string): Promise<boolean> {
-    if (isSupabaseConfigured() && supabase) {
-      const { error } = await supabase.from('subcategories').delete().eq('id', id);
-      if (!error) return true;
-    }
     localSubcategories = localSubcategories.filter((s) => s.id !== id);
     return true;
   },
@@ -142,46 +208,25 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('brands').select('*');
         if (!error && data && data.length > 0) return data;
-      } catch (err) {
-        console.error('Supabase getBrands error:', err);
-      }
+      } catch (err) {}
     }
     return localBrands;
   },
 
   async saveBrand(brand: Partial<Brand>): Promise<Brand> {
-    if (isSupabaseConfigured() && supabase) {
-      if (brand.id) {
-        const { data, error } = await supabase.from('brands').update(brand).eq('id', brand.id).select().single();
-        if (!error && data) return data;
-      } else {
-        const { data, error } = await supabase.from('brands').insert(brand).select().single();
-        if (!error && data) return data;
-      }
-    }
-
-    if (brand.id) {
-      localBrands = localBrands.map((b) => b.id === brand.id ? ({ ...b, ...brand } as Brand) : b);
-      return localBrands.find((b) => b.id === brand.id)!;
-    } else {
-      const newBrand: Brand = {
-        id: `brand-${Date.now()}`,
-        name: brand.name || 'New Brand',
-        slug: brand.slug || `brand-${Date.now()}`,
-        description: brand.description || '',
-        logo_url: brand.logo_url || '',
-        created_at: new Date().toISOString(),
-      };
-      localBrands.push(newBrand);
-      return newBrand;
-    }
+    const newBrand: Brand = {
+      id: brand.id || `brand-${Date.now()}`,
+      name: brand.name || 'New Brand',
+      slug: brand.slug || `brand-${Date.now()}`,
+      description: brand.description || '',
+      logo_url: brand.logo_url || '',
+      created_at: new Date().toISOString(),
+    };
+    localBrands.push(newBrand);
+    return newBrand;
   },
 
   async deleteBrand(id: string): Promise<boolean> {
-    if (isSupabaseConfigured() && supabase) {
-      const { error } = await supabase.from('brands').delete().eq('id', id);
-      if (!error) return true;
-    }
     localBrands = localBrands.filter((b) => b.id !== id);
     return true;
   },
@@ -195,9 +240,7 @@ export const dataService = {
           .select('*')
           .order('display_order', { ascending: true });
         if (!error && data && data.length > 0) return data;
-      } catch (err) {
-        console.error('Supabase getSliders error:', err);
-      }
+      } catch (err) {}
     }
     return localSliders;
   },
@@ -220,10 +263,9 @@ export const dataService = {
         if (options?.limit) query = query.limit(options.limit);
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
-          // If categorySlug filter is specified
           if (options?.categorySlug) {
             const categories = await this.getCategories();
-            const cat = categories.find((c) => c.slug === options.categorySlug);
+            const cat = categories.find((c) => c.slug.toLowerCase() === options.categorySlug?.toLowerCase());
             if (cat) {
               return data.filter((p) => p.category_id === cat.id);
             }
@@ -235,24 +277,38 @@ export const dataService = {
       }
     }
 
-    let result = [...localProducts];
+    const currentCats = await this.getCategories();
+    const currentBrands = await this.getBrands();
+    let result = getStoredProducts();
+
     if (!options?.includeInactive) result = result.filter((p) => p.is_active);
     if (options?.featuredOnly) result = result.filter((p) => p.is_featured);
     if (options?.newArrivalsOnly) result = result.filter((p) => p.is_new_arrival);
+
     if (options?.categorySlug) {
-      const category = localCategories.find((c) => c.slug === options.categorySlug);
-      if (category) result = result.filter((p) => p.category_id === category.id);
+      const category = currentCats.find(
+        (c) => c.slug.toLowerCase() === options.categorySlug?.toLowerCase()
+      );
+      if (category) {
+        result = result.filter((p) => p.category_id === category.id);
+      }
     }
+
     if (options?.brandSlug) {
-      const brand = localBrands.find((b) => b.slug === options.brandSlug);
-      if (brand) result = result.filter((p) => p.brand_id === brand.id);
+      const brand = currentBrands.find(
+        (b) => b.slug.toLowerCase() === options.brandSlug?.toLowerCase()
+      );
+      if (brand) {
+        result = result.filter((p) => p.brand_id === brand.id);
+      }
     }
+
     if (options?.limit) result = result.slice(0, options.limit);
 
     return result.map((p) => {
-      const category = localCategories.find((c) => c.id === p.category_id);
+      const category = currentCats.find((c) => c.id === p.category_id);
       const subcategory = localSubcategories.find((s) => s.id === p.subcategory_id);
-      const brand = localBrands.find((b) => b.id === p.brand_id);
+      const brand = currentBrands.find((b) => b.id === p.brand_id);
       return { ...p, category, subcategory, brand };
     });
   },
@@ -262,15 +318,16 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
         if (!error && data) return data;
-      } catch (err) {
-        console.error('Supabase getProductById error:', err);
-      }
+      } catch (err) {}
     }
-    const found = localProducts.find((p) => p.id === id);
+    const currentProds = getStoredProducts();
+    const found = currentProds.find((p) => p.id === id);
     if (!found) return null;
-    const category = localCategories.find((c) => c.id === found.category_id);
+    const currentCats = await this.getCategories();
+    const currentBrands = await this.getBrands();
+    const category = currentCats.find((c) => c.id === found.category_id);
     const subcategory = localSubcategories.find((s) => s.id === found.subcategory_id);
-    const brand = localBrands.find((b) => b.id === found.brand_id);
+    const brand = currentBrands.find((b) => b.id === found.brand_id);
     return { ...found, category, subcategory, brand };
   },
 
@@ -279,32 +336,41 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('products').select('*').eq('slug', slug).single();
         if (!error && data) return data;
-      } catch (err) {
-        console.error('Supabase getProductBySlug error:', err);
-      }
+      } catch (err) {}
     }
-    const found = localProducts.find((p) => p.slug === slug);
+    const currentProds = getStoredProducts();
+    const found = currentProds.find((p) => p.slug.toLowerCase() === slug.toLowerCase());
     if (!found) return null;
-    const category = localCategories.find((c) => c.id === found.category_id);
+    const currentCats = await this.getCategories();
+    const currentBrands = await this.getBrands();
+    const category = currentCats.find((c) => c.id === found.category_id);
     const subcategory = localSubcategories.find((s) => s.id === found.subcategory_id);
-    const brand = localBrands.find((b) => b.id === found.brand_id);
+    const brand = currentBrands.find((b) => b.id === found.brand_id);
     return { ...found, category, subcategory, brand };
   },
 
   async saveProduct(product: Partial<Product>): Promise<Product> {
     if (isSupabaseConfigured() && supabase) {
-      if (product.id) {
-        const { data, error } = await supabase.from('products').update(product).eq('id', product.id).select().single();
-        if (!error && data) return data;
-      } else {
-        const { data, error } = await supabase.from('products').insert(product).select().single();
-        if (!error && data) return data;
+      try {
+        if (product.id) {
+          const { data, error } = await supabase.from('products').update(product).eq('id', product.id).select().single();
+          if (!error && data) return data;
+        } else {
+          const { data, error } = await supabase.from('products').insert(product).select().single();
+          if (!error && data) return data;
+        }
+      } catch (err) {
+        console.error('Supabase saveProduct error:', err);
       }
     }
 
+    const currentProds = getStoredProducts();
     if (product.id) {
-      localProducts = localProducts.map((p) => p.id === product.id ? ({ ...p, ...product } as Product) : p);
-      return localProducts.find((p) => p.id === product.id)!;
+      const updated = currentProds.map((p) =>
+        p.id === product.id ? ({ ...p, ...product } as Product) : p
+      );
+      saveStoredProducts(updated);
+      return updated.find((p) => p.id === product.id)!;
     } else {
       const newProd: Product = {
         id: `prod-${Date.now()}`,
@@ -316,28 +382,32 @@ export const dataService = {
         price: product.price || 0,
         discount_price: product.discount_price,
         stock_quantity: product.stock_quantity || 0,
-        sku: product.sku || `SKU-${Date.now()}`,
+        sku: product.sku || `ATB-${Math.floor(1000 + Math.random() * 9000)}`,
         model_no: product.model_no || '',
         description: product.description || '',
         images: product.images && product.images.length > 0 ? product.images : [
           'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&fit=crop&q=80'
         ],
         is_active: product.is_active ?? true,
-        is_featured: product.is_featured ?? false,
-        is_new_arrival: product.is_new_arrival ?? false,
+        is_featured: product.is_featured ?? true,
+        is_new_arrival: product.is_new_arrival ?? true,
         created_at: new Date().toISOString(),
       };
-      localProducts.unshift(newProd);
+      const updated = [newProd, ...currentProds];
+      saveStoredProducts(updated);
       return newProd;
     }
   },
 
   async deleteProduct(id: string): Promise<boolean> {
     if (isSupabaseConfigured() && supabase) {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (!error) return true;
+      try {
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (!error) return true;
+      } catch (err) {}
     }
-    localProducts = localProducts.filter((p) => p.id !== id);
+    const currentProds = getStoredProducts();
+    saveStoredProducts(currentProds.filter((p) => p.id !== id));
     return true;
   },
 
@@ -389,25 +459,14 @@ export const dataService = {
             }));
             await supabase.from('order_items').insert(itemsToInsert);
           }
-
-          if (orderData.payment_method !== 'cod' && orderData.trx_id) {
-            await supabase.from('payments').insert({
-              order_id: data.id,
-              payment_method: orderData.payment_method,
-              sender_number: orderData.sender_number,
-              trx_id: orderData.trx_id,
-              amount: newOrder.total_amount,
-              status: 'pending',
-            });
-          }
           return { ...newOrder, id: data.id };
         }
-      } catch (err) {
-        console.error('Supabase createOrder error:', err);
-      }
+      } catch (err) {}
     }
 
-    localOrders.unshift(newOrder);
+    const currentOrders = getStoredOrders();
+    const updated = [newOrder, ...currentOrders];
+    saveStoredOrders(updated);
     return newOrder;
   },
 
@@ -419,40 +478,17 @@ export const dataService = {
           .select('*, items:order_items(*), payment:payments(*)')
           .order('created_at', { ascending: false });
         if (!error && data) return data;
-      } catch (err) {
-        console.error('Supabase getOrders error:', err);
-      }
+      } catch (err) {}
     }
-    return localOrders;
+    return getStoredOrders();
   },
 
   // --- SETTINGS ---
   async getStoreSettings(): Promise<StoreSettings> {
-    if (isSupabaseConfigured() && supabase) {
-      try {
-        const { data, error } = await supabase.from('settings').select('*').single();
-        if (!error && data) return data;
-      } catch (err) {
-        console.error('Supabase getStoreSettings error:', err);
-      }
-    }
     return localSettings;
   },
 
   async updateStoreSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
-    if (isSupabaseConfigured() && supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('settings')
-          .update(settings)
-          .eq('id', localSettings.id)
-          .select()
-          .single();
-        if (!error && data) return data;
-      } catch (err) {
-        console.error('Supabase updateStoreSettings error:', err);
-      }
-    }
     localSettings = { ...localSettings, ...settings };
     return localSettings;
   },
