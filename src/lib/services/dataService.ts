@@ -87,6 +87,7 @@ function saveStoredOrders(orders: Order[]) {
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      window.dispatchEvent(new Event('atb_orders_updated'));
     } catch (err) {}
   }
 }
@@ -630,6 +631,17 @@ export const dataService = {
       } catch (e) {}
     }
     return target || null;
+  },
+
+  async clearOrders(): Promise<boolean> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('order_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('orders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      } catch (err) {}
+    }
+    saveStoredOrders([]);
+    return true;
   },
 
   // --- SETTINGS ---

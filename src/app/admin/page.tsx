@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  DollarSign,
   ShoppingBag,
   Package,
   Layers,
@@ -18,7 +17,8 @@ import {
   ChevronDown,
   Calendar,
   CreditCard,
-  Eye
+  RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { dataService } from '@/lib/services/dataService';
 import { Order, Product, Category, Slider } from '@/lib/supabase/types';
@@ -32,33 +32,64 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('Last 7 Days');
 
+  const loadDashboard = async () => {
+    const [o, p, c, s] = await Promise.all([
+      dataService.getOrders(),
+      dataService.getProducts({ includeInactive: true }),
+      dataService.getCategories(),
+      dataService.getSliders(),
+    ]);
+    setOrders(o);
+    setProducts(p);
+    setCategories(c);
+    setSliders(s);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    async function loadDashboard() {
-      const [o, p, c, s] = await Promise.all([
-        dataService.getOrders(),
-        dataService.getProducts({ includeInactive: true }),
-        dataService.getCategories(),
-        dataService.getSliders(),
-      ]);
-      setOrders(o);
-      setProducts(p);
-      setCategories(c);
-      setSliders(s);
-      setLoading(false);
-    }
     loadDashboard();
+
+    const handleOrdersUpdate = () => {
+      dataService.getOrders().then((o) => setOrders(o));
+    };
+
+    window.addEventListener('atb_orders_updated', handleOrdersUpdate);
+    return () => window.removeEventListener('atb_orders_updated', handleOrdersUpdate);
   }, []);
 
-  // Compute metrics with realistic baseline matching Image 1
-  const orderCount = Math.max(orders.length, 71);
-  const revenueCalculated = orders.reduce((sum, ord) => sum + (ord.total_amount || 0), 0);
-  const totalRevenue = revenueCalculated > 0 ? revenueCalculated + 580000 : 585500;
+  // Compute 100% accurate metrics from real order records (starts strictly at 0 for fresh store)
+  const orderCount = orders.length;
+  const totalRevenue = orders.reduce((sum, ord) => sum + (ord.total_amount || 0), 0);
 
-  // Pipeline counts
-  const newOrdersCount = orders.filter((o) => o.status === 'new').length || 5;
-  const pendingPaymentsCount = orders.filter((o) => o.status === 'payment_pending').length || 3;
-  const approvedPaymentsCount = orders.filter((o) => o.status === 'confirmed').length || 8;
-  const packagingCount = orders.filter((o) => o.status === 'packaging').length || 4;
+  // Pipeline counts & revenues
+  const newOrders = orders.filter((o) => o.status === 'new');
+  const newOrdersCount = newOrders.length;
+  const newOrdersRevenue = newOrders.reduce((sum, ord) => sum + (ord.total_amount || 0), 0);
+
+  const pendingPayments = orders.filter((o) => o.status === 'payment_pending');
+  const pendingPaymentsCount = pendingPayments.length;
+  const pendingPaymentsRevenue = pendingPayments.reduce((sum, ord) => sum + (ord.total_amount || 0), 0);
+
+  const approvedPayments = orders.filter((o) => o.status === 'confirmed');
+  const approvedPaymentsCount = approvedPayments.length;
+  const approvedPaymentsRevenue = approvedPayments.reduce((sum, ord) => sum + (ord.total_amount || 0), 0);
+
+  const packagingOrders = orders.filter((o) => o.status === 'packaging');
+  const packagingCount = packagingOrders.length;
+  const packagingRevenue = packagingOrders.reduce((sum, ord) => sum + (ord.total_amount || 0), 0);
+
+  // 1-Click Reset to 0 (Clear test orders & start fresh store counters)
+  const handleResetToZero = async () => {
+    if (
+      confirm(
+        'Reset all test orders and revenue counters to 0? This will give you a fresh, clean dashboard to start live business.'
+      )
+    ) {
+      await dataService.clearOrders();
+      setOrders([]);
+      alert('All order statistics and revenue have been reset to 0!');
+    }
+  };
 
   if (loading) {
     return (
@@ -71,7 +102,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Title Row - Matching Image 1 */}
+      {/* Title Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900">
@@ -82,7 +113,17 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Reset All to 0 Button */}
+          <button
+            onClick={handleResetToZero}
+            className="inline-flex items-center space-x-1.5 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition-all cursor-pointer"
+            title="Reset test orders and revenue to 0"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset to 0</span>
+          </button>
+
           {/* Date Filter Dropdown */}
           <div className="relative">
             <button className="flex items-center space-x-2 bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors">
@@ -103,31 +144,33 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Pending bKash / Nagad Alert Banner - Matching Image 1 */}
-      <div className="bg-rose-50/70 border border-rose-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
-            <ShieldAlert className="w-5 h-5" />
+      {/* Pending bKash / Nagad Alert Banner - Appears ONLY when real pending verification exists */}
+      {pendingPaymentsCount > 0 && (
+        <div className="bg-rose-50/80 border border-rose-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-extrabold text-rose-900">
+                {pendingPaymentsCount} Pending bKash / Nagad {pendingPaymentsCount === 1 ? 'Payment' : 'Payments'} Need Verification
+              </h3>
+              <p className="text-[11px] sm:text-xs text-rose-700 mt-0.5">
+                Customers submitted TrxIDs that require manual mobile app approval
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xs sm:text-sm font-extrabold text-rose-900">
-              3 Pending bKash / Nagad Payments Need Verification
-            </h3>
-            <p className="text-[11px] sm:text-xs text-rose-700 mt-0.5">
-              Customers submitted TrxIDs that require manual mobile app approval
-            </p>
-          </div>
+
+          <Link
+            href="/admin/payments"
+            className="bg-[#E11D48] hover:bg-rose-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-colors shrink-0"
+          >
+            Open Queue
+          </Link>
         </div>
+      )}
 
-        <Link
-          href="/admin/payments"
-          className="bg-[#E11D48] hover:bg-rose-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-colors shrink-0"
-        >
-          Open Queue
-        </Link>
-      </div>
-
-      {/* Top 2 Big Cards - Matching Image 1 */}
+      {/* Top 2 Big Cards: TOTAL GROSS REVENUE & TOTAL ORDER VOLUME */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* TOTAL GROSS REVENUE */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs flex items-center justify-between hover:border-slate-300 transition-colors">
@@ -166,7 +209,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Pipeline Status Row (4 Cards Matching Image 1) */}
+      {/* Pipeline Status Row (4 Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* New Orders */}
         <div className="bg-white border border-amber-200 rounded-3xl p-4 sm:p-5 shadow-xs relative overflow-hidden">
@@ -177,7 +220,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <p className="text-xl sm:text-2xl font-black text-slate-900">{newOrdersCount} Orders</p>
-          <span className="text-[11px] text-slate-500 font-semibold">Tk. 28,500</span>
+          <span className="text-[11px] text-slate-500 font-semibold">Tk. {newOrdersRevenue.toLocaleString()}</span>
         </div>
 
         {/* Payment Pending */}
@@ -189,7 +232,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <p className="text-xl sm:text-2xl font-black text-slate-900">{pendingPaymentsCount} Orders</p>
-          <span className="text-[11px] text-slate-500 font-semibold">Tk. 18,450</span>
+          <span className="text-[11px] text-slate-500 font-semibold">Tk. {pendingPaymentsRevenue.toLocaleString()}</span>
         </div>
 
         {/* Payment Approved */}
@@ -201,7 +244,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <p className="text-xl sm:text-2xl font-black text-slate-900">{approvedPaymentsCount} Orders</p>
-          <span className="text-[11px] text-slate-500 font-semibold">Tk. 64,200</span>
+          <span className="text-[11px] text-slate-500 font-semibold">Tk. {approvedPaymentsRevenue.toLocaleString()}</span>
         </div>
 
         {/* Packaging */}
@@ -213,7 +256,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <p className="text-xl sm:text-2xl font-black text-slate-900">{packagingCount} Orders</p>
-          <span className="text-[11px] text-slate-500 font-semibold">Tk. 32,100</span>
+          <span className="text-[11px] text-slate-500 font-semibold">Tk. {packagingRevenue.toLocaleString()}</span>
         </div>
       </div>
 
@@ -249,7 +292,7 @@ export default function AdminDashboardPage() {
 
       {/* Quick Catalog & Recent Orders Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Catalog summary */}
+        {/* Catalog Quick Stats */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
           <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
             Catalog Overview
@@ -261,7 +304,7 @@ export default function AdminDashboardPage() {
               className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <Package className="w-4 h-4 text-[#F5921F]" />
+                <Package className="w-4 h-4 text-blue-500" />
                 <span className="text-xs font-bold text-slate-800">Total Products</span>
               </div>
               <span className="text-xs font-black text-slate-900 bg-white px-2.5 py-1 rounded-xl border border-slate-200">
@@ -274,7 +317,7 @@ export default function AdminDashboardPage() {
               className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <Layers className="w-4 h-4 text-purple-600" />
+                <Layers className="w-4 h-4 text-emerald-500" />
                 <span className="text-xs font-bold text-slate-800">Categories</span>
               </div>
               <span className="text-xs font-black text-slate-900 bg-white px-2.5 py-1 rounded-xl border border-slate-200">
@@ -323,8 +366,12 @@ export default function AdminDashboardPage() {
           </div>
 
           {orders.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-xs">
-              No orders placed yet. Orders will appear here in real time.
+            <div className="text-center py-10 text-slate-400 text-xs space-y-2">
+              <ShoppingBag className="w-8 h-8 text-slate-300 mx-auto stroke-1" />
+              <p className="font-semibold text-slate-600">No orders placed yet.</p>
+              <p className="text-[11px] text-slate-400">
+                Customer purchases made on your website will appear here in real time.
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">

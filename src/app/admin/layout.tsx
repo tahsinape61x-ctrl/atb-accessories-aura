@@ -20,18 +20,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { ATB_LOGO } from '@/lib/logoData';
-
-const ADMIN_NAV = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-  { name: 'Payment Queue', href: '/admin/payments', icon: CreditCard, badge: '1 Pending' },
-  { name: 'Products', href: '/admin/products', icon: Package },
-  { name: 'Categories', href: '/admin/categories', icon: Layers },
-  { name: 'Brands', href: '/admin/brands', icon: Award },
-  { name: 'Sliders / Banners', href: '/admin/sliders', icon: SlidersHorizontal },
-  { name: 'Customers', href: '/admin/customers', icon: Users },
-  { name: 'Store Settings', href: '/admin/settings', icon: Settings },
-];
+import { dataService } from '@/lib/services/dataService';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -40,6 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingPaymentsCount, setPendingPaymentsCount] = useState(0);
 
   useEffect(() => {
     if (isLoginPage) return;
@@ -49,7 +39,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } else {
       setIsAuthenticated(true);
     }
+
+    const checkPending = () => {
+      dataService.getOrders().then((ords) => {
+        const count = ords.filter((o) => o.status === 'payment_pending').length;
+        setPendingPaymentsCount(count);
+      });
+    };
+    checkPending();
+    window.addEventListener('atb_orders_updated', checkPending);
+    return () => window.removeEventListener('atb_orders_updated', checkPending);
   }, [pathname, isLoginPage, router]);
+
+  const ADMIN_NAV = [
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+    {
+      name: 'Payment Queue',
+      href: '/admin/payments',
+      icon: CreditCard,
+      badge: pendingPaymentsCount > 0 ? `${pendingPaymentsCount} Pending` : undefined,
+    },
+    { name: 'Products', href: '/admin/products', icon: Package },
+    { name: 'Categories', href: '/admin/categories', icon: Layers },
+    { name: 'Brands', href: '/admin/brands', icon: Award },
+    { name: 'Sliders / Banners', href: '/admin/sliders', icon: SlidersHorizontal },
+    { name: 'Customers', href: '/admin/customers', icon: Users },
+    { name: 'Store Settings', href: '/admin/settings', icon: Settings },
+  ];
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -221,9 +238,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               title="1 Pending Verification"
             >
               <Bell className="w-4 h-4 text-slate-700" />
-              <span className="absolute -top-1 -right-1 bg-[#F5921F] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
-                1
-              </span>
+              {pendingPaymentsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#F5921F] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
+                  {pendingPaymentsCount}
+                </span>
+              )}
             </Link>
 
             {/* Log Out Button */}
