@@ -7,6 +7,7 @@ import { CheckCircle2, PackageCheck, Phone, ArrowRight, Home } from 'lucide-reac
 import { formatPrice } from '@/lib/utils';
 import * as fpixel from '@/lib/fpixel';
 import { Order } from '@/lib/supabase/types';
+import { ATB_LOGO } from '@/lib/logoData';
 
 export default function OrderSuccessPage() {
   const params = useParams();
@@ -62,10 +63,15 @@ export default function OrderSuccessPage() {
 
       {/* Order Info Card */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 mt-8 text-left shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
-          <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Order Number</p>
-            <p className="text-xl font-extrabold text-[#F5921F]">{orderNumber || 'ATB-ORDER'}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#0b474d] border border-slate-200 shadow-2xs shrink-0">
+              <img src={ATB_LOGO} alt="ATB Accessories Aura" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Order Number</p>
+              <p className="text-xl font-extrabold text-[#F5921F]">{orderNumber || 'ATB-ORDER'}</p>
+            </div>
           </div>
           <div>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Payment Method</p>

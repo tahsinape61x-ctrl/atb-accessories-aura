@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Bell,
 } from 'lucide-react';
+import { ATB_LOGO } from '@/lib/logoData';
 
 const ADMIN_NAV = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -73,8 +74,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile Top Header */}
       <div className="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 sticky top-0 z-50">
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#F5921F] flex items-center justify-center font-black text-slate-950 text-sm">
-            A
+          <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#0b474d] border border-slate-700 shrink-0">
+            <img src={ATB_LOGO} alt="ATB Admin" className="w-full h-full object-cover" />
           </div>
           <span className="font-extrabold text-sm text-white">ATB Admin</span>
         </div>
@@ -95,8 +96,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="space-y-6">
           {/* Logo & Store Branding */}
           <div className="flex items-center space-x-3 pb-5 border-b border-slate-800">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#F5921F] to-orange-400 flex items-center justify-center font-black text-slate-950 text-lg shadow-md">
-              A
+            <div className="w-11 h-11 rounded-2xl overflow-hidden bg-[#0b474d] border border-slate-700 shadow-md shrink-0">
+              <img src={ATB_LOGO} alt="ATB ACCESSORIES" className="w-full h-full object-cover" />
             </div>
             <div>
               <h2 className="text-sm font-black text-white tracking-tight">ATB ACCESSORIES</h2>
@@ -174,8 +175,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="h-4 w-px bg-slate-200"></div>
 
             <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-[11px] font-bold text-[#F5921F]">
-                A
+              <div className="w-7 h-7 rounded-full overflow-hidden bg-[#0b474d] border border-slate-300 shadow-2xs shrink-0">
+                <img src={ATB_LOGO} alt="ATB Admin" className="w-full h-full object-cover" />
               </div>
               <span className="text-xs font-bold text-slate-800">Administrator</span>
             </div>

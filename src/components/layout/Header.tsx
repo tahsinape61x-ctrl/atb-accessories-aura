@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { dataService } from '@/lib/services/dataService';
 import { Product } from '@/lib/supabase/types';
 import { formatPrice } from '@/lib/utils';
+import { ATB_LOGO } from '@/lib/logoData';
 
 export default function Header() {
   const { cartCount } = useCart();
@@ -60,10 +61,16 @@ export default function Header() {
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 shrink-0 group">
-            <div className="relative h-10 sm:h-12 w-36 sm:w-52">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-[#F5921F] flex items-center h-full">
-                ATB <span className="text-slate-900 ml-1 text-sm sm:text-base font-extrabold">AURA</span>
+          <Link href="/" className="flex items-center space-x-2.5 shrink-0 group">
+            <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl overflow-hidden shadow-xs border border-slate-200 group-hover:scale-105 transition-transform bg-[#0b474d] shrink-0">
+              <img src={ATB_LOGO} alt="ATB ACCESSORIES AURA" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 leading-none group-hover:text-[#F5921F] transition-colors">
+                ATB <span className="text-[#F5921F]">AURA</span>
+              </span>
+              <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mt-0.5">
+                Accessories
               </span>
             </div>
           </Link>

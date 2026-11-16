@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShieldCheck, Truck, CreditCard, RefreshCw, Phone, MapPin, Mail, Facebook, Instagram } from 'lucide-react';
+import { ATB_LOGO } from '@/lib/logoData';
 
 export default function Footer() {
   return (
@@ -59,10 +60,18 @@ export default function Footer() {
         
         {/* Col 1: Store Intro & Social Links */}
         <div className="space-y-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-black text-[#F5921F]">
-              ATB <span className="text-slate-900 ml-1 font-extrabold">AURA</span>
-            </span>
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-2xl overflow-hidden shadow-xs border border-slate-300 group-hover:scale-105 transition-transform bg-[#0b474d] shrink-0">
+              <img src={ATB_LOGO} alt="ATB ACCESSORIES AURA" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 leading-none group-hover:text-[#F5921F] transition-colors">
+                ATB <span className="text-[#F5921F]">AURA</span>
+              </span>
+              <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-1">
+                Official Accessories BD
+              </span>
+            </div>
           </Link>
           <p className="text-slate-600 leading-relaxed text-xs font-medium">
             <strong>ATB ACCESSORIES AURA</strong> — Your premier destination for chargers, AirPods, cables, earphones, speakers, power banks, and smartwatches in Bangladesh.

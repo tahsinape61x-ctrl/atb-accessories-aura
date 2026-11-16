@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, ShieldAlert, ArrowRight } from 'lucide-react';
+import { ATB_LOGO } from '@/lib/logoData';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -27,8 +28,8 @@ export default function AdminLoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 bg-orange-50 text-[#F5921F] rounded-2xl flex items-center justify-center mx-auto border border-orange-100">
-            <Lock className="w-7 h-7" />
+          <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#0b474d] mx-auto border border-slate-200 shadow-md">
+            <img src={ATB_LOGO} alt="ATB Accessories Aura" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900">Admin Portal</h1>
           <p className="text-xs text-slate-500">Sign in to manage ATB Accessories Aura store</p>

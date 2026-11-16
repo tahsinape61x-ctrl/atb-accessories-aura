@@ -5,6 +5,7 @@ import { Search, PackageCheck, Phone, CheckCircle, Clock, Truck, Check, AlertCir
 import { dataService } from '@/lib/services/dataService';
 import { Order } from '@/lib/supabase/types';
 import { formatPrice } from '@/lib/utils';
+import { ATB_LOGO } from '@/lib/logoData';
 
 export default function TrackOrderPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,8 +68,8 @@ export default function TrackOrderPage() {
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-8 sm:py-16 space-y-8">
       <div className="text-center space-y-2">
-        <div className="w-16 h-16 bg-orange-50 text-[#F5921F] rounded-full flex items-center justify-center mx-auto mb-2 border border-orange-100">
-          <PackageCheck className="w-8 h-8" />
+        <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#0b474d] mx-auto mb-2 border border-slate-200 shadow-md">
+          <img src={ATB_LOGO} alt="ATB Accessories Aura" className="w-full h-full object-cover" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
           Track Your Order
@@ -105,10 +106,15 @@ export default function TrackOrderPage() {
         <div className="max-w-2xl mx-auto">
           {order ? (
             <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Order Number</span>
-                  <h3 className="text-xl font-extrabold text-[#F5921F]">{order.order_number}</h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-4 gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#0b474d] border border-slate-200 shadow-2xs shrink-0">
+                    <img src={ATB_LOGO} alt="ATB Accessories Aura" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Order Number</span>
+                    <h3 className="text-xl font-extrabold text-[#F5921F]">{order.order_number}</h3>
+                  </div>
                 </div>
                 <div className="text-left sm:text-right">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Status</span>
