@@ -66,6 +66,7 @@ function saveStoredCategories(cats: Category[]) {
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(cats));
+      window.dispatchEvent(new Event('atb_categories_updated'));
     } catch (err) {
       console.error('Error saving categories to localStorage', err);
     }

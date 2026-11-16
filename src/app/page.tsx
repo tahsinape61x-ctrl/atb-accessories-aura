@@ -54,6 +54,16 @@ export default function HomePage() {
         setSliders(res.filter((s) => s.is_active));
       });
     };
+    const handleCategoriesUpdate = () => {
+      dataService.getCategories().then((res) => {
+        setCategories(res);
+      });
+    };
+    const handleBrandsUpdate = () => {
+      dataService.getBrands().then((res) => {
+        setBrands(res);
+      });
+    };
     const handleStoreUpdate = () => {
       dataService.getProducts().then((res) => {
         setFeaturedProducts(res);
@@ -61,9 +71,13 @@ export default function HomePage() {
     };
 
     window.addEventListener('atb_sliders_updated', handleSlidersUpdate);
+    window.addEventListener('atb_categories_updated', handleCategoriesUpdate);
+    window.addEventListener('atb_brands_updated', handleBrandsUpdate);
     window.addEventListener('atb_store_updated', handleStoreUpdate);
     return () => {
       window.removeEventListener('atb_sliders_updated', handleSlidersUpdate);
+      window.removeEventListener('atb_categories_updated', handleCategoriesUpdate);
+      window.removeEventListener('atb_brands_updated', handleBrandsUpdate);
       window.removeEventListener('atb_store_updated', handleStoreUpdate);
     };
   }, []);

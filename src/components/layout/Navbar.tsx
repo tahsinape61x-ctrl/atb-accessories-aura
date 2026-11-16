@@ -16,6 +16,13 @@ export default function Navbar() {
       setCategories(cats);
     }
     loadCategories();
+
+    const handleUpdate = () => {
+      dataService.getCategories().then((cats) => setCategories(cats));
+    };
+
+    window.addEventListener('atb_categories_updated', handleUpdate);
+    return () => window.removeEventListener('atb_categories_updated', handleUpdate);
   }, []);
 
   return (
