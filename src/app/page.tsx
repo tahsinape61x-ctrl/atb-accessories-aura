@@ -84,36 +84,11 @@ export default function HomePage() {
       : featuredProducts.filter((p) => p.category?.slug === selectedCategoryTab);
 
   return (
-    <div className="space-y-8 sm:space-y-12 pb-16 w-full max-w-full overflow-x-hidden font-sans">
-      {/* 1. TOP ANNOUNCEMENT RIBBON */}
-      <div className="bg-gradient-to-r from-slate-900 via-orange-950 to-slate-900 text-white py-2 px-3 text-center border-b border-orange-500/20">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-xs font-semibold">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span className="text-orange-400 font-bold">100% Genuine Gadgets & Official Warranty</span>
-            <span className="hidden md:inline text-slate-400">— Nationwide Delivery in 24-48 Hours</span>
-          </div>
-          <div className="flex items-center space-x-3 text-slate-300">
-            <span className="bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20 text-[10px]">
-              Cash on Delivery & bKash
-            </span>
-            <a
-              href="https://wa.me/8801706312594"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-orange-400 flex items-center space-x-1"
-            >
-              <Phone className="w-3 h-3 text-emerald-400" />
-              <span>Hotline: 01706-312594</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. HERO BANNER SLIDER */}
+    <div className="space-y-6 sm:space-y-10 pb-16 w-full max-w-full overflow-x-hidden font-sans pt-2 sm:pt-4">
+      {/* 1. HERO BANNER SLIDER */}
       {sliders.length > 0 && (
         <section className="max-w-7xl mx-auto px-3 sm:px-4">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-slate-950 border border-slate-200 aspect-[16/9] sm:aspect-[21/9] min-h-[240px] sm:min-h-[380px] md:min-h-[440px] w-full">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-slate-950 border border-slate-200 aspect-[16/9] sm:aspect-[21/9] min-h-[300px] sm:min-h-[380px] md:min-h-[440px] w-full">
             {sliders.map((slide, index) => (
               <div
                 key={slide.id}
@@ -126,7 +101,7 @@ export default function HomePage() {
                   alt={slide.title || 'Banner'}
                   className="w-full h-full object-cover object-center brightness-75 hover:scale-105 transition-transform duration-1000"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-transparent flex flex-col justify-center px-6 md:px-16 text-white space-y-2 sm:space-y-4">
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-transparent flex flex-col justify-center px-5 sm:px-10 md:px-16 text-white space-y-2.5 sm:space-y-4">
                   <div className="flex items-center space-x-2">
                     <span className="bg-[#F5921F] text-slate-950 text-[10px] sm:text-xs font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
                       {(slide as any).badge_text || 'Official Stock 2026'}
@@ -140,21 +115,21 @@ export default function HomePage() {
                     {slide.title}
                   </h1>
 
-                  <p className="text-slate-300 text-xs sm:text-sm md:text-base max-w-lg font-medium drop-shadow">
+                  <p className="text-slate-300 text-xs sm:text-sm md:text-base max-w-lg font-medium drop-shadow line-clamp-2 sm:line-clamp-none">
                     {slide.subtitle}
                   </p>
 
-                  <div className="pt-2 flex items-center space-x-3">
+                  <div className="pt-1 sm:pt-2 flex items-center space-x-2.5 sm:space-x-3">
                     <Link
                       href={slide.link || '/category/charger'}
-                      className="inline-flex items-center space-x-2 bg-[#F5921F] hover:bg-[#d97d13] text-white font-black text-xs sm:text-sm px-6 sm:px-8 py-3 rounded-full shadow-lg transition-all transform hover:scale-105"
+                      className="inline-flex items-center space-x-2 bg-[#F5921F] hover:bg-[#d97d13] text-white font-black text-xs sm:text-sm px-5 sm:px-8 py-2.5 sm:py-3 rounded-full shadow-lg transition-all transform hover:scale-105"
                     >
                       <span>Explore Gear</span>
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                     <Link
                       href="/offers"
-                      className="inline-flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-full border border-white/20 transition-colors"
+                      className="inline-flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border border-white/20 transition-colors"
                     >
                       <Flame className="w-4 h-4 text-rose-500 fill-rose-500" />
                       <span>Hot Deals</span>
@@ -261,7 +236,7 @@ export default function HomePage() {
               href={`/category/${cat.slug}`}
               className="bg-white hover:bg-orange-50/40 border border-slate-200 hover:border-[#F5921F] rounded-2xl p-4 text-center transition-all duration-300 group flex flex-col items-center shadow-xs hover:shadow-md transform hover:-translate-y-1"
             >
-              <div className="w-18 h-18 relative rounded-full overflow-hidden mb-3 bg-slate-100 border-2 border-slate-200 group-hover:border-[#F5921F] group-hover:scale-105 transition-all">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 relative rounded-full overflow-hidden mb-3 bg-slate-100 border-2 border-slate-200 group-hover:border-[#F5921F] group-hover:scale-105 transition-all">
                 {cat.image_url ? (
                   <Image src={cat.image_url} alt={cat.name} fill className="object-cover" />
                 ) : (

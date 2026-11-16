@@ -151,14 +151,40 @@ export default function Header() {
 
         {/* Mobile Search Input Row */}
         {isMobileSearchOpen && (
-          <div className="mt-2.5 pt-2 border-t border-slate-100 md:hidden">
+          <div className="mt-2.5 pt-2 border-t border-slate-100 md:hidden relative">
             <input
               type="text"
               placeholder="Search gadgets & accessories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#F7F8FA] border border-slate-300 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-[#F5921F]"
+              autoFocus
             />
+            {isSearching && searchResults.length > 0 && (
+              <div className="mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                {searchResults.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/product/${p.slug}`}
+                    onClick={() => {
+                      setIsSearching(false);
+                      setIsMobileSearchOpen(false);
+                    }}
+                    className="flex items-center space-x-3 p-2.5 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="w-9 h-9 relative bg-slate-100 rounded-lg overflow-hidden shrink-0">
+                      <Image src={p.images[0]} alt={p.title} fill className="object-contain p-1" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-bold text-slate-900 truncate">{p.title}</h4>
+                      <div className="text-xs font-extrabold text-[#F5921F]">
+                        {formatPrice(p.discount_price || p.price)}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

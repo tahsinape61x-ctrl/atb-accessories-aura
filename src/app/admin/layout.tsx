@@ -94,26 +94,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </div>
 
-      {/* Sidebar (Desktop & Mobile Drawer) - Exact match to Image 1 */}
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="md:hidden fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-2xs transition-opacity"
+        />
+      )}
+
+      {/* Sidebar (Desktop Sticky & Mobile Slide-in Drawer) */}
       <aside
         className={`${
-          mobileMenuOpen ? 'block' : 'hidden'
-        } md:flex w-full md:w-64 bg-white text-slate-700 shrink-0 p-5 flex-col justify-between fixed md:sticky top-0 h-screen z-40 border-r border-slate-200 shadow-sm overflow-y-auto`}
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        } transition-transform duration-300 ease-in-out md:flex w-72 md:w-64 bg-white text-slate-700 shrink-0 p-5 flex-col justify-between fixed md:sticky top-0 h-screen z-50 md:z-40 border-r border-slate-200 shadow-xl md:shadow-xs overflow-y-auto`}
       >
         <div className="space-y-6">
           {/* Logo & Store Branding */}
-          <Link href="/admin" className="flex items-center space-x-3 pb-4 border-b border-slate-100 group">
-            <div className="w-10 h-10 rounded-2xl overflow-hidden bg-[#0b474d] border border-slate-200 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-              <img src={ATB_LOGO} alt="ATB ACCESSORIES" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-1">
-                <span className="text-base font-black text-slate-900 tracking-tight leading-none">ATB</span>
-                <span className="text-base font-black text-[#F5921F] tracking-tight leading-none">AURA</span>
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <Link href="/admin" className="flex items-center space-x-3 group">
+              <div className="w-10 h-10 rounded-2xl overflow-hidden bg-[#0b474d] border border-slate-200 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                <img src={ATB_LOGO} alt="ATB ACCESSORIES" className="w-full h-full object-cover" />
               </div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Admin Portal</p>
-            </div>
-          </Link>
+              <div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-base font-black text-slate-900 tracking-tight leading-none">ATB</span>
+                  <span className="text-base font-black text-[#F5921F] tracking-tight leading-none">AURA</span>
+                </div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Admin Portal</p>
+              </div>
+            </Link>
+
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="md:hidden p-1.5 text-slate-400 hover:text-slate-700 rounded-xl bg-slate-100"
+              aria-label="Close Menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
           {/* Navigation Links */}
           <nav className="space-y-1.5">
