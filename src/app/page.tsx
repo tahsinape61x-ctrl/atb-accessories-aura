@@ -102,7 +102,7 @@ export default function HomePage() {
       {/* 1. HERO BANNER SLIDER */}
       {sliders.length > 0 && (
         <section className="max-w-7xl mx-auto px-3 sm:px-4">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-slate-950 border border-slate-200 aspect-[16/9] sm:aspect-[21/9] min-h-[300px] sm:min-h-[380px] md:min-h-[440px] w-full">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-slate-950 border border-slate-200 aspect-[16/9] sm:aspect-[21/8] md:aspect-[24/8] min-h-[250px] sm:min-h-[320px] md:min-h-[360px] max-h-[420px] w-full">
             {sliders.map((slide, index) => (
               <div
                 key={slide.id}
@@ -115,37 +115,37 @@ export default function HomePage() {
                   alt={slide.title || 'Banner'}
                   className="w-full h-full object-cover object-center brightness-75 hover:scale-105 transition-transform duration-1000"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-transparent flex flex-col justify-center px-5 sm:px-10 md:px-16 text-white space-y-2.5 sm:space-y-4">
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-transparent flex flex-col justify-center px-5 sm:px-10 md:px-16 text-white space-y-2 sm:space-y-3">
                   <div className="flex items-center space-x-2">
-                    <span className="bg-[#F5921F] text-slate-950 text-[10px] sm:text-xs font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
+                    <span className="bg-[#F5921F] text-slate-950 text-[10px] sm:text-xs font-black tracking-widest uppercase px-3 py-0.5 sm:py-1 rounded-full shadow-sm">
                       {(slide as any).badge_text || 'Official Stock 2026'}
                     </span>
-                    <span className="bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full border border-white/20">
+                    <span className="bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold px-3 py-0.5 sm:py-1 rounded-full border border-white/20">
                       Best BD Pricing
                     </span>
                   </div>
 
-                  <h1 className="text-xl sm:text-3xl md:text-5xl font-black max-w-xl leading-tight tracking-tight drop-shadow-md">
+                  <h1 className="text-lg sm:text-2xl md:text-4xl font-black max-w-xl leading-tight tracking-tight drop-shadow-md">
                     {slide.title}
                   </h1>
 
-                  <p className="text-slate-300 text-xs sm:text-sm md:text-base max-w-lg font-medium drop-shadow line-clamp-2 sm:line-clamp-none">
+                  <p className="text-slate-300 text-xs sm:text-sm max-w-lg font-medium drop-shadow line-clamp-2">
                     {slide.subtitle}
                   </p>
 
-                  <div className="pt-1 sm:pt-2 flex items-center space-x-2.5 sm:space-x-3">
+                  <div className="pt-1 flex items-center space-x-2.5 sm:space-x-3">
                     <Link
                       href={slide.link || '/category/charger'}
-                      className="inline-flex items-center space-x-2 bg-[#F5921F] hover:bg-[#d97d13] text-white font-black text-xs sm:text-sm px-5 sm:px-8 py-2.5 sm:py-3 rounded-full shadow-lg transition-all transform hover:scale-105"
+                      className="inline-flex items-center space-x-2 bg-[#F5921F] hover:bg-[#d97d13] text-white font-black text-xs sm:text-sm px-4 sm:px-7 py-2 sm:py-2.5 rounded-full shadow-lg transition-all transform hover:scale-105"
                     >
                       <span>Explore Gear</span>
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                     <Link
                       href="/offers"
-                      className="inline-flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border border-white/20 transition-colors"
+                      className="inline-flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full border border-white/20 transition-colors"
                     >
-                      <Flame className="w-4 h-4 text-rose-500 fill-rose-500" />
+                      <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
                       <span>Hot Deals</span>
                     </Link>
                   </div>
@@ -170,13 +170,13 @@ export default function HomePage() {
             </button>
 
             {/* Dots */}
-            <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
               {sliders.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveSlide(i)}
                   className={`h-2 rounded-full transition-all ${
-                    i === activeSlide ? 'w-8 bg-[#F5921F]' : 'w-2 bg-white/60 hover:bg-white'
+                    i === activeSlide ? 'w-7 bg-[#F5921F]' : 'w-2 bg-white/60 hover:bg-white'
                   }`}
                   aria-label={`Slide ${i + 1}`}
                 />
@@ -186,85 +186,85 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* 3. VALUE PROPOSITION FEATURE CARDS */}
+      {/* 2. EXPLORE TOP CATEGORIES (Placed directly below hero for optimal e-commerce conversion) */}
       <section className="max-w-7xl mx-auto px-3 sm:px-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center space-x-3.5 shadow-xs hover:border-[#F5921F]/50 transition-colors">
-            <div className="w-11 h-11 rounded-xl bg-orange-50 border border-orange-200 text-[#F5921F] flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">100% Authentic</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Official Brand Warranty</p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center space-x-3.5 shadow-xs hover:border-[#F5921F]/50 transition-colors">
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
-              <Truck className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">Express Delivery</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Dhaka 24h, Nationwide 48h</p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center space-x-3.5 shadow-xs hover:border-[#F5921F]/50 transition-colors">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
-              <CreditCard className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">COD & Mobile Banking</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">bKash, Nagad, Rocket</p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center space-x-3.5 shadow-xs hover:border-[#F5921F]/50 transition-colors">
-            <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
-              <RefreshCw className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">7 Days Replacement</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">Hassle-Free Warranty</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. SHOP BY CATEGORY GRID */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-4">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-3.5">
           <div>
-            <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <Zap className="w-5 h-5 text-[#F5921F] fill-[#F5921F]" />
+            <h2 className="text-base sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#F5921F] fill-[#F5921F]" />
               <span>Explore Top Categories</span>
             </h2>
-            <p className="text-slate-500 text-xs mt-0.5">Find high performance phone and audio accessories</p>
+            <p className="text-slate-500 text-[11px] sm:text-xs">Find high performance phone and audio accessories</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-2.5 sm:gap-3.5">
           {categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/category/${cat.slug}`}
-              className="bg-white hover:bg-orange-50/40 border border-slate-200 hover:border-[#F5921F] rounded-2xl p-4 text-center transition-all duration-300 group flex flex-col items-center shadow-xs hover:shadow-md transform hover:-translate-y-1"
+              className="bg-white hover:bg-orange-50/40 border border-slate-200/90 hover:border-[#F5921F] rounded-2xl p-3 sm:p-4 text-center transition-all duration-300 group flex flex-col items-center shadow-2xs hover:shadow-md transform hover:-translate-y-1"
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 relative rounded-full overflow-hidden mb-3 bg-slate-100 border-2 border-slate-200 group-hover:border-[#F5921F] group-hover:scale-105 transition-all">
+              <div className="w-14 h-14 sm:w-18 sm:h-18 relative rounded-full overflow-hidden mb-2 sm:mb-2.5 bg-slate-100 border-2 border-slate-200 group-hover:border-[#F5921F] group-hover:scale-105 transition-all shadow-2xs">
                 {cat.image_url ? (
-                  <Image src={cat.image_url} alt={cat.name} fill className="object-cover" />
+                  <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-slate-100 text-[#F5921F] font-black text-xl">
+                  <div className="w-full h-full flex items-center justify-center bg-slate-100 text-[#F5921F] font-black text-lg">
                     {cat.name.charAt(0)}
                   </div>
                 )}
               </div>
-              <span className="text-xs font-bold text-slate-900 group-hover:text-[#F5921F] line-clamp-1">
+              <span className="text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-[#F5921F] line-clamp-1">
                 {cat.name}
               </span>
-              <span className="text-[10px] text-slate-400 font-semibold mt-0.5">Explore ➔</span>
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-semibold mt-0.5">Explore ➔</span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* 3. VALUE PROPOSITION FEATURE CARDS */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 shadow-2xs hover:border-[#F5921F]/50 transition-colors">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-orange-50 border border-orange-200 text-[#F5921F] flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">100% Authentic</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Official Brand Warranty</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 shadow-2xs hover:border-[#F5921F]/50 transition-colors">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+              <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">Express Delivery</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Dhaka 24h, Nationwide 48h</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 shadow-2xs hover:border-[#F5921F]/50 transition-colors">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+              <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">COD & Mobile Banking</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">bKash, Nagad, Rocket</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 shadow-2xs hover:border-[#F5921F]/50 transition-colors">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
+              <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">7 Days Replacement</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Hassle-Free Warranty</p>
+            </div>
+          </div>
         </div>
       </section>
 
