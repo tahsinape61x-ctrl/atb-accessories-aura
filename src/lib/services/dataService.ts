@@ -14,6 +14,7 @@ const STORAGE_KEYS = {
   CATEGORIES: 'atb_store_categories_v2',
   BRANDS: 'atb_store_brands_v2',
   ORDERS: 'atb_store_orders_v2',
+  SLIDERS: 'atb_store_sliders_v2',
   SETTINGS: 'atb_store_settings_v2',
 };
 
@@ -89,9 +90,55 @@ function saveStoredOrders(orders: Order[]) {
   }
 }
 
+function getStoredSliders(): Slider[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.SLIDERS);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (err) {
+      console.error('Error reading sliders from localStorage', err);
+    }
+  }
+  return [...INITIAL_SLIDERS];
+}
+
+function saveStoredSliders(sliders: Slider[]) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SLIDERS, JSON.stringify(sliders));
+      window.dispatchEvent(new Event('atb_sliders_updated'));
+    } catch (err) {
+      console.error('Error saving sliders to localStorage', err);
+    }
+  }
+}
+
+function getStoredBrands(): Brand[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.BRANDS);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (err) {}
+  }
+  return [...INITIAL_BRANDS];
+}
+
+function saveStoredBrands(brands: Brand[]) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(brands));
+      window.dispatchEvent(new Event('atb_brands_updated'));
+    } catch (err) {}
+  }
+}
+
 let localSubcategories = [...INITIAL_SUBCATEGORIES];
-let localBrands = [...INITIAL_BRANDS];
-let localSliders = [...INITIAL_SLIDERS];
 let localSettings = { ...INITIAL_SETTINGS };
 
 export const dataService = {
@@ -210,24 +257,47 @@ export const dataService = {
         if (!error && data && data.length > 0) return data;
       } catch (err) {}
     }
-    return localBrands;
+    return getStoredBrands();
   },
 
   async saveBrand(brand: Partial<Brand>): Promise<Brand> {
-    const newBrand: Brand = {
-      id: brand.id || `brand-${Date.now()}`,
-      name: brand.name || 'New Brand',
-      slug: brand.slug || `brand-${Date.now()}`,
-      description: brand.description || '',
-      logo_url: brand.logo_url || '',
-      created_at: new Date().toISOString(),
-    };
-    localBrands.push(newBrand);
-    return newBrand;
+    const current = await this.getBrands();
+    let updatedBrand: Brand;
+    if (brand.id) {
+      updatedBrand = {
+        ...current.find((b) => b.id === brand.id)!,
+        ...brand,
+      } as Brand;
+      const updated = current.map((b) => (b.id === brand.id ? updatedBrand : b));
+      saveStoredBrands(updated);
+    } else {
+      updatedBrand = {
+        id: `brand-${Date.now()}`,
+        name: brand.name || 'New Brand',
+        slug: brand.slug || `brand-${Date.now()}`,
+        description: brand.description || '',
+        logo_url: brand.logo_url || '',
+        created_at: new Date().toISOString(),
+      };
+      saveStoredBrands([...current, updatedBrand]);
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('brands').upsert(updatedBrand);
+      } catch (err) {}
+    }
+    return updatedBrand;
   },
 
   async deleteBrand(id: string): Promise<boolean> {
-    localBrands = localBrands.filter((b) => b.id !== id);
+    const current = await this.getBrands();
+    saveStoredBrands(current.filter((b) => b.id !== id));
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('brands').delete().eq('id', id);
+      } catch (err) {}
+    }
     return true;
   },
 
@@ -242,7 +312,57 @@ export const dataService = {
         if (!error && data && data.length > 0) return data;
       } catch (err) {}
     }
-    return localSliders;
+    return getStoredSliders();
+  },
+
+  async getSliderById(id: string): Promise<Slider | null> {
+    const list = await this.getSliders();
+    return list.find((s) => s.id === id) || null;
+  },
+
+  async saveSlider(sliderData: Partial<Slider> & { id?: string }): Promise<Slider> {
+    const current = await this.getSliders();
+    let updatedSlider: Slider;
+
+    if (sliderData.id) {
+      const existing = current.find((s) => s.id === sliderData.id);
+      updatedSlider = {
+        ...(existing || { id: sliderData.id }),
+        ...sliderData,
+      } as Slider;
+      const updatedList = current.map((s) => (s.id === sliderData.id ? updatedSlider : s));
+      saveStoredSliders(updatedList);
+    } else {
+      updatedSlider = {
+        id: `sl-${Date.now()}`,
+        title: sliderData.title || 'New Banner Slide',
+        subtitle: sliderData.subtitle || '',
+        image_url: sliderData.image_url || 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1600&auto=format&fit=crop&q=80',
+        link: sliderData.link || '/category/charger',
+        display_order: sliderData.display_order ?? (current.length + 1),
+        is_active: sliderData.is_active ?? true,
+        created_at: new Date().toISOString(),
+      };
+      saveStoredSliders([...current, updatedSlider]);
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('sliders').upsert(updatedSlider);
+      } catch (err) {}
+    }
+    return updatedSlider;
+  },
+
+  async deleteSlider(id: string): Promise<boolean> {
+    const current = await this.getSliders();
+    saveStoredSliders(current.filter((s) => s.id !== id));
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('sliders').delete().eq('id', id);
+      } catch (err) {}
+    }
+    return true;
   },
 
   // --- PRODUCTS ---

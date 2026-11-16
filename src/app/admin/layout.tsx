@@ -5,27 +5,31 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
+  ShoppingBag,
+  CreditCard,
   Package,
   Layers,
-  ShoppingBag,
+  Award,
+  SlidersHorizontal,
+  Users,
   Settings,
-  CreditCard,
   LogOut,
-  ChevronRight,
-  ExternalLink,
+  Bell,
   Menu,
   X,
-  ShieldCheck,
-  Bell,
+  ExternalLink,
 } from 'lucide-react';
 import { ATB_LOGO } from '@/lib/logoData';
 
 const ADMIN_NAV = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Products Catalog', href: '/admin/products', icon: Package },
+  { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+  { name: 'Payment Queue', href: '/admin/payments', icon: CreditCard, badge: '1 Pending' },
+  { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Categories', href: '/admin/categories', icon: Layers },
-  { name: 'Customer Orders', href: '/admin/orders', icon: ShoppingBag },
-  { name: 'Payments & TrxID', href: '/admin/payments', icon: CreditCard },
+  { name: 'Brands', href: '/admin/brands', icon: Award },
+  { name: 'Sliders / Banners', href: '/admin/sliders', icon: SlidersHorizontal },
+  { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Store Settings', href: '/admin/settings', icon: Settings },
 ];
 
@@ -47,7 +51,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [pathname, isLoginPage, router]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
@@ -58,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#F5921F] border-t-transparent"></div>
       </div>
     );
@@ -72,59 +75,79 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans">
       {/* Mobile Top Header */}
-      <div className="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 sticky top-0 z-50">
+      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-2xs">
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#0b474d] border border-slate-700 shrink-0">
+          <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#0b474d] border border-slate-200 shrink-0">
             <img src={ATB_LOGO} alt="ATB Admin" className="w-full h-full object-cover" />
           </div>
-          <span className="font-extrabold text-sm text-white">ATB Admin</span>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-sm text-slate-900 leading-none">ATB Admin</span>
+            <span className="text-[10px] text-[#F5921F] font-bold">Portal</span>
+          </div>
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-1.5 text-slate-300 hover:text-white rounded-lg bg-slate-800"
+          className="p-2 text-slate-600 hover:text-slate-900 rounded-xl bg-slate-100"
+          aria-label="Toggle Menu"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* Sidebar (Desktop and Mobile Overlay) */}
+      {/* Sidebar (Desktop & Mobile Drawer) - Exact match to Image 1 */}
       <aside
         className={`${
           mobileMenuOpen ? 'block' : 'hidden'
-        } md:flex w-full md:w-64 bg-slate-900 text-white shrink-0 p-5 flex-col justify-between fixed md:sticky top-0 h-screen z-40 border-r border-slate-800 shadow-xl`}
+        } md:flex w-full md:w-64 bg-white text-slate-700 shrink-0 p-5 flex-col justify-between fixed md:sticky top-0 h-screen z-40 border-r border-slate-200 shadow-sm overflow-y-auto`}
       >
         <div className="space-y-6">
           {/* Logo & Store Branding */}
-          <div className="flex items-center space-x-3 pb-5 border-b border-slate-800">
-            <div className="w-11 h-11 rounded-2xl overflow-hidden bg-[#0b474d] border border-slate-700 shadow-md shrink-0">
+          <Link href="/admin" className="flex items-center space-x-3 pb-4 border-b border-slate-100 group">
+            <div className="w-10 h-10 rounded-2xl overflow-hidden bg-[#0b474d] border border-slate-200 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
               <img src={ATB_LOGO} alt="ATB ACCESSORIES" className="w-full h-full object-cover" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white tracking-tight">ATB ACCESSORIES</h2>
-              <p className="text-[10px] text-[#F5921F] font-bold uppercase tracking-wider">Admin Portal</p>
+              <div className="flex items-center space-x-1">
+                <span className="text-base font-black text-slate-900 tracking-tight leading-none">ATB</span>
+                <span className="text-base font-black text-[#F5921F] tracking-tight leading-none">AURA</span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Admin Portal</p>
             </div>
-          </div>
+          </Link>
 
           {/* Navigation Links */}
-          <nav className="space-y-1">
+          <nav className="space-y-1.5">
             {ADMIN_NAV.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive =
+                item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#F5921F] text-slate-950 font-extrabold shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                      ? 'bg-[#F5921F] text-white shadow-sm font-extrabold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-bold'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-slate-950' : 'text-slate-400'}`} />
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                     <span>{item.name}</span>
                   </div>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5" />}
+
+                  {item.badge && (
+                    <span
+                      className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                        isActive
+                          ? 'bg-white text-rose-600'
+                          : 'bg-rose-500 text-white shadow-2xs'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -132,18 +155,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Bottom Actions */}
-        <div className="pt-6 border-t border-slate-800/80 space-y-2">
+        <div className="pt-4 border-t border-slate-100 space-y-2">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition-colors"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 transition-colors"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-[#F5921F]" />
-            <span>View Live Website</span>
+            <div className="flex items-center space-x-2">
+              <ExternalLink className="w-3.5 h-3.5 text-[#F5921F]" />
+              <span>View Live Website</span>
+            </div>
           </Link>
+
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
+            className="w-full flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>
@@ -153,33 +179,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content Area */}
       <main className="flex-grow flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Navbar Header inside Admin */}
-        <header className="bg-white border-b border-slate-200 px-6 py-3.5 hidden md:flex items-center justify-between sticky top-0 z-30 shadow-xs">
-          <div className="flex items-center space-x-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs font-bold text-slate-700">
-              ATB ACCESSORIES AURA — Store Administration
-            </span>
+        {/* Top Navbar Header inside Admin - Exact Match to Image 1 */}
+        <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+          <div>
+            <div className="flex items-center space-x-2">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                ATB ACCESSORIES AURA Admin
+              </h2>
+              <span className="bg-orange-50 text-orange-600 border border-orange-200 text-[10px] font-black uppercase px-2 py-0.5 rounded-md">
+                Live System
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Manage products, categories, mobile banking payments & store settings
+            </p>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Notification Bell with Badge 1 */}
             <Link
-              href="/"
-              target="_blank"
-              className="text-xs font-bold text-[#F5921F] hover:underline flex items-center space-x-1"
+              href="/admin/payments"
+              className="relative p-2.5 text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-full border border-slate-200 transition-colors"
+              title="1 Pending Verification"
             >
-              <span>Storefront</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <Bell className="w-4 h-4 text-slate-700" />
+              <span className="absolute -top-1 -right-1 bg-[#F5921F] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
+                1
+              </span>
             </Link>
 
-            <div className="h-4 w-px bg-slate-200"></div>
-
-            <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 rounded-full overflow-hidden bg-[#0b474d] border border-slate-300 shadow-2xs shrink-0">
-                <img src={ATB_LOGO} alt="ATB Admin" className="w-full h-full object-cover" />
-              </div>
-              <span className="text-xs font-bold text-slate-800">Administrator</span>
-            </div>
+            {/* Log Out Button */}
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-rose-200 text-rose-600 bg-rose-50/60 hover:bg-rose-100 text-xs font-bold transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Log Out</span>
+            </button>
           </div>
         </header>
 

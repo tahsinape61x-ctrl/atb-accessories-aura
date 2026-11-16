@@ -48,6 +48,7 @@ export default function AdminPaymentsPage() {
                   <th className="py-3 px-4">Total Amount</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -61,12 +62,35 @@ export default function AdminPaymentsPage() {
                     <td className="py-3.5 px-4 uppercase font-bold text-[#F5921F]">{ord.payment_method}</td>
                     <td className="py-3.5 px-4 font-black text-slate-900">{formatPrice(ord.total_amount)}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800">
-                        Pending Verification
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                        ord.status === 'confirmed' || ord.status === 'delivered'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {ord.status === 'confirmed' || ord.status === 'delivered' ? 'Approved' : 'Pending Verification'}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-slate-400 text-[11px]">
                       {new Date(ord.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      {ord.status !== 'confirmed' && ord.status !== 'delivered' ? (
+                        <button
+                          onClick={async () => {
+                            await dataService.updateOrderStatus(ord.id, 'confirmed');
+                            const updated = await dataService.getOrders();
+                            setOrders(updated);
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-lg shadow-2xs transition-colors cursor-pointer"
+                        >
+                          Approve
+                        </button>
+                      ) : (
+                        <span className="text-emerald-600 font-bold text-xs flex items-center justify-end space-x-1">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Verified</span>
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

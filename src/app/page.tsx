@@ -42,12 +42,30 @@ export default function HomePage() {
         dataService.getBrands(),
         dataService.getProducts(),
       ]);
-      setSliders(sData);
+      setSliders(sData.filter((s) => s.is_active));
       setCategories(cData);
       setBrands(bData);
       setFeaturedProducts(pData);
     }
     loadData();
+
+    const handleSlidersUpdate = () => {
+      dataService.getSliders().then((res) => {
+        setSliders(res.filter((s) => s.is_active));
+      });
+    };
+    const handleStoreUpdate = () => {
+      dataService.getProducts().then((res) => {
+        setFeaturedProducts(res);
+      });
+    };
+
+    window.addEventListener('atb_sliders_updated', handleSlidersUpdate);
+    window.addEventListener('atb_store_updated', handleStoreUpdate);
+    return () => {
+      window.removeEventListener('atb_sliders_updated', handleSlidersUpdate);
+      window.removeEventListener('atb_store_updated', handleStoreUpdate);
+    };
   }, []);
 
   // Auto slide effect
@@ -103,17 +121,15 @@ export default function HomePage() {
                   index === activeSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                 }`}
               >
-                <Image
+                <img
                   src={slide.image_url}
                   alt={slide.title || 'Banner'}
-                  fill
-                  priority={index === 0}
-                  className="object-cover object-center brightness-75 hover:scale-105 transition-transform duration-1000"
+                  className="w-full h-full object-cover object-center brightness-75 hover:scale-105 transition-transform duration-1000"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-transparent flex flex-col justify-center px-6 md:px-16 text-white space-y-2 sm:space-y-4">
                   <div className="flex items-center space-x-2">
                     <span className="bg-[#F5921F] text-slate-950 text-[10px] sm:text-xs font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
-                      Official Stock 2026
+                      {(slide as any).badge_text || 'Official Stock 2026'}
                     </span>
                     <span className="bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full border border-white/20">
                       Best BD Pricing
